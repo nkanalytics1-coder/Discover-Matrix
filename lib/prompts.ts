@@ -1,11 +1,3 @@
-import type { Outlet } from "./types";
-
-const TONE: Record<Outlet, string> = {
-  TGCOM: "giornalistico, autorevole, con sensibilità emotiva",
-  SPORT: "energico, diretto, entusiasta",
-  INFINITY: "informale, fresco, conversazionale",
-};
-
 export function buildSystemPrompt(): string {
   return `Sei un headline editor di giornalismo digitale italiano, specializzato in Google Discover.
 
@@ -29,11 +21,9 @@ OUTPUT: solo il titolo finale. Niente virgolette esterne, niente parentesi quadr
 export function buildUserPrompt(
   h1: string,
   occhiello: string,
-  outlet: Outlet,
+  tov: string,
   variant: "precise" | "bold"
 ): string {
-  const tone = TONE[outlet];
-
   const variantInstruction =
     variant === "precise"
       ? `ANGOLO PROTAGONISTA
@@ -48,18 +38,37 @@ Parti da lì — il contrasto con le aspettative è il gancio.
 Formula guida: [Elemento inatteso/rottura], [dettaglio specifico che alimenta curiosità]: [implicazione]
 Puoi iniziare con il luogo, l'evento o il dato più dirompente.`;
 
-  return `ARTICOLO:
+  return `PROFILO EDITORIALE DELLA TESTATA:
+${tov}
+
+ARTICOLO:
 Occhiello (contesto semantico): "${occhiello}"
 H1 originale (base da riscrivere): "${h1}"
-Outlet: ${outlet} — Tono: ${tone}
 
 ${variantInstruction}
 
 CRITERI DI QUALITÀ:
 ✓ I primi 40 caratteri contengono l'elemento emotivo più forte
 ✓ Il lettore capisce il tema ma non conosce ancora l'esito → deve cliccare
+✓ Coerente con il tono editoriale della testata
 ✓ Nessuna parola vaga o burocratica
 ✓ 75-110 caratteri
 
 Scrivi UN solo titolo italiano. Grammatica perfetta.`;
+}
+
+export function buildTovPrompt(outletName: string, titles: string[]): string {
+  return `Sei un analista di tone of voice editoriale. Analizza questi ${titles.length} titoli recenti di "${outletName}" e costruisci un profilo del tone of voice per ottimizzare la riscrittura dei titoli per Google Discover.
+
+TITOLI CAMPIONE:
+${titles.map((t, i) => `${i + 1}. ${t}`).join("\n")}
+
+Produci un profilo sintetico (max 300 parole) con questa struttura esatta:
+
+**Registro**: [formale / informale / neutro / istituzionale — una parola]
+**Struttura tipica**: [pattern sintattico prevalente, es. "soggetto + virgolette dirette", "luogo: fatto — dettaglio"]
+**Vocabolario caratteristico**: [parole, espressioni, costruzioni ricorrenti nella testata]
+**Tendenza emotiva**: [oggettiva / emotiva / mista — con una frase di motivazione]
+**Formule ad alto CTR per questa testata**: [3-5 pattern ricorrenti, con un esempio ciascuno tratto dai titoli sopra]
+**Note stilistiche per la riscrittura**: [qualsiasi caratteristica che un redattore deve rispettare per rimanere coerente con l'identità editoriale]`;
 }

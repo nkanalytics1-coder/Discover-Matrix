@@ -1,120 +1,90 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+interface ProjectCard {
+  id: string; name: string; slug: string; homepage_url: string; created_at: string;
+}
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-      if (res.ok) {
-        router.push("/generator");
-      } else {
-        const data = await res.json();
-        setError(data.error || "Codice non valido");
-      }
-    } catch {
-      setError("Errore di rete. Riprova.");
-    } finally {
-      setLoading(false);
-    }
-  }
+export default function HomePage() {
+  const router = useRouter();
+  const [projects, setProjects] = useState<ProjectCard[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/projects")
+      .then((r) => r.json())
+      .then(setProjects)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1.5rem",
-        background: "var(--bg)",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "380px",
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "16px",
-          padding: "2.5rem 2rem",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>⚡</div>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: 700, margin: 0, color: "var(--text)" }}>
-            Discover Matrix
-          </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", marginTop: "0.25rem" }}>
-            Generatore og:title per Google Discover
-          </p>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+      <header style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)", padding: "1rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ fontSize: "1.2rem" }}>⚡</span>
+          <span style={{ fontWeight: 700, fontSize: "1rem" }}>Discover Matrix</span>
+        </div>
+        <button onClick={() => router.push("/admin/login")} style={ghostBtn}>Admin</button>
+      </header>
+
+      <main style={{ maxWidth: "860px", margin: "0 auto", padding: "2.5rem 1.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "2rem" }}>
+          <div>
+            <h1 style={{ fontSize: "1.5rem", fontWeight: 700, margin: 0 }}>Progetti</h1>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", marginTop: "0.25rem" }}>
+              Seleziona un progetto o creane uno nuovo
+            </p>
+          </div>
+          <button onClick={() => router.push("/new")} style={primaryBtn}>+ Nuovo progetto</button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <label
-            htmlFor="code"
-            style={{ display: "block", fontSize: "0.8rem", color: "var(--text-muted)", marginBottom: "0.4rem" }}
-          >
-            Codice di accesso
-          </label>
-          <input
-            id="code"
-            type="password"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="••••••••"
-            autoFocus
-            autoComplete="current-password"
-            style={{
-              width: "100%",
-              padding: "0.7rem 1rem",
-              background: "var(--surface-2)",
-              border: `1px solid ${error ? "var(--danger)" : "var(--border)"}`,
-              borderRadius: "8px",
-              color: "var(--text)",
-              fontSize: "1rem",
-              outline: "none",
-              marginBottom: "1rem",
-            }}
-          />
-          {error && (
-            <p style={{ color: "var(--danger)", fontSize: "0.8rem", marginBottom: "0.75rem", marginTop: "-0.5rem" }}>
-              {error}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={loading || !code}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              background: loading || !code ? "#c8ccdc" : "var(--accent)",
-              color: loading || !code ? "var(--text-muted)" : "#fff",
-              border: "none",
-              borderRadius: "8px",
-              fontWeight: 600,
-              fontSize: "0.95rem",
-              cursor: loading || !code ? "not-allowed" : "pointer",
-              transition: "background 0.15s",
-            }}
-          >
-            {loading ? "Accesso in corso..." : "Accedi"}
-          </button>
-        </form>
-      </div>
+        {loading && (
+          <div style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Caricamento...</div>
+        )}
+
+        {!loading && projects.length === 0 && (
+          <div style={{ textAlign: "center", padding: "4rem 0", color: "var(--text-muted)" }}>
+            <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>📰</div>
+            <p style={{ marginBottom: "1rem" }}>Nessun progetto ancora.</p>
+            <button onClick={() => router.push("/new")} style={primaryBtn}>Crea il primo progetto</button>
+          </div>
+        )}
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
+          {projects.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => router.push(`/${p.slug}`)}
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "12px",
+                padding: "1.25rem",
+                textAlign: "left",
+                cursor: "pointer",
+                transition: "box-shadow 0.15s, border-color 0.15s",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--accent)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 12px rgba(79,82,214,0.1)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.05)"; }}
+            >
+              <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: "0.35rem" }}>{p.name}</div>
+              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginBottom: "0.75rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.homepage_url}</div>
+              <div style={{ fontSize: "0.7rem", color: "var(--accent)", fontWeight: 600 }}>Apri →</div>
+            </button>
+          ))}
+        </div>
+      </main>
     </div>
   );
 }
+
+const primaryBtn: React.CSSProperties = {
+  background: "var(--accent)", color: "#fff", border: "none", borderRadius: "8px",
+  padding: "0.55rem 1.1rem", fontWeight: 600, fontSize: "0.875rem", cursor: "pointer", fontFamily: "inherit",
+};
+const ghostBtn: React.CSSProperties = {
+  background: "none", border: "1px solid var(--border)", borderRadius: "7px",
+  padding: "0.4rem 0.9rem", color: "var(--text-muted)", fontSize: "0.8rem", cursor: "pointer", fontFamily: "inherit",
+};
