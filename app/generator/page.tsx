@@ -135,8 +135,8 @@ export default function GeneratorPage() {
           disabled={loading || !h1.trim() || !occhiello.trim()}
           style={{
             padding: "0.85rem 2rem",
-            background: loading || !h1.trim() || !occhiello.trim() ? "var(--border)" : "var(--accent)",
-            color: "#fff",
+            background: loading || !h1.trim() || !occhiello.trim() ? "#c8ccdc" : "var(--accent)",
+            color: loading || !h1.trim() || !occhiello.trim() ? "var(--text-muted)" : "#fff",
             border: "none",
             borderRadius: "10px",
             fontWeight: 700,
@@ -153,11 +153,12 @@ export default function GeneratorPage() {
           <div
             style={{
               padding: "0.75rem 1rem",
-              background: "#3a1a1a",
-              border: "1px solid var(--danger)",
+              background: "var(--danger-light)",
+              border: "1px solid #fca5a5",
               borderRadius: "8px",
               color: "var(--danger)",
               fontSize: "0.875rem",
+              fontWeight: 400,
             }}
           >
             {error}
@@ -167,8 +168,8 @@ export default function GeneratorPage() {
         {/* Loading skeleton */}
         {loading && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <Skeleton label="PRECISO" color="var(--precise)" />
-            <Skeleton label="AUDACE" color="var(--bold)" />
+            <Skeleton label="PROTAGONISTA" color="var(--precise)" />
+            <Skeleton label="RIVELAZIONE" color="var(--bold)" />
           </div>
         )}
 

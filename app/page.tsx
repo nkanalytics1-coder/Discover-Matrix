@@ -101,8 +101,8 @@ export default function LoginPage() {
             style={{
               width: "100%",
               padding: "0.75rem",
-              background: loading || !code ? "var(--border)" : "var(--accent)",
-              color: "#fff",
+              background: loading || !code ? "#c8ccdc" : "var(--accent)",
+              color: loading || !code ? "var(--text-muted)" : "#fff",
               border: "none",
               borderRadius: "8px",
               fontWeight: 600,

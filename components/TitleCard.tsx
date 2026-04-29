@@ -23,8 +23,8 @@ export default function TitleCard({ data, outlet = "TGCOM24" }: Props) {
 
   const isPrecise = data.variant === "precise";
   const accentColor = isPrecise ? "var(--precise)" : "var(--bold)";
-  const label = isPrecise ? "PRECISO" : "AUDACE";
-  const emoji = isPrecise ? "📋" : "🔥";
+  const accentBg = isPrecise ? "var(--ok-light)" : "var(--warn-light)";
+  const label = isPrecise ? "PROTAGONISTA" : "RIVELAZIONE";
 
   async function copyTitle() {
     await navigator.clipboard.writeText(data.text);
@@ -36,9 +36,10 @@ export default function TitleCard({ data, outlet = "TGCOM24" }: Props) {
     <div
       style={{
         background: "var(--surface)",
-        border: `1px solid var(--border)`,
+        border: "1px solid var(--border)",
         borderRadius: "12px",
         overflow: "hidden",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
       }}
     >
       {/* Header */}
@@ -47,35 +48,28 @@ export default function TitleCard({ data, outlet = "TGCOM24" }: Props) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0.75rem 1.25rem",
+          padding: "0.65rem 1.25rem",
           borderBottom: "1px solid var(--border)",
-          background: "var(--surface-2)",
+          background: accentBg,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span>{emoji}</span>
-          <span style={{ fontSize: "0.72rem", fontWeight: 800, color: accentColor, letterSpacing: "0.1em" }}>
-            {label}
-          </span>
-          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
-            temp {isPrecise ? "0.4" : "0.9"}
-          </span>
-        </div>
+        <span
+          style={{
+            fontSize: "0.68rem",
+            fontWeight: 700,
+            color: accentColor,
+            letterSpacing: "0.1em",
+          }}
+        >
+          {label}
+        </span>
         <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button
-            onClick={() => setShowPreview(!showPreview)}
-            title="Preview Discover"
-            style={iconBtn}
-          >
+          <button onClick={() => setShowPreview(!showPreview)} style={iconBtn}>
             {showPreview ? "✕ preview" : "👁 preview"}
           </button>
           <button
             onClick={copyTitle}
-            title="Copia"
-            style={{
-              ...iconBtn,
-              color: copied ? "var(--ok)" : "var(--text-muted)",
-            }}
+            style={{ ...iconBtn, color: copied ? "var(--ok)" : "var(--text-muted)", borderColor: copied ? "var(--ok)" : "var(--border)" }}
           >
             {copied ? "✓ copiato" : "⎘ copia"}
           </button>
@@ -87,10 +81,11 @@ export default function TitleCard({ data, outlet = "TGCOM24" }: Props) {
         <p
           style={{
             margin: 0,
-            fontSize: "1rem",
-            lineHeight: 1.55,
+            fontSize: "1.05rem",
+            lineHeight: 1.6,
             color: "var(--text)",
             wordBreak: "break-word",
+            fontWeight: 300,
           }}
         >
           {data.text}
@@ -98,20 +93,13 @@ export default function TitleCard({ data, outlet = "TGCOM24" }: Props) {
       </div>
 
       {/* Char counter */}
-      <div style={{ padding: "0 1.25rem 0.75rem" }}>
+      <div style={{ padding: "0 1.25rem 0.85rem" }}>
         <CharCounter count={data.charCount} />
       </div>
 
       {/* Validation badges */}
       {data.validation.warnings.length > 0 && (
-        <div
-          style={{
-            padding: "0.6rem 1.25rem 0.75rem",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "0.4rem",
-          }}
-        >
+        <div style={{ padding: "0 1.25rem 0.85rem", display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
           {data.validation.warnings.map((w, i) => (
             <span
               key={i}
@@ -122,9 +110,10 @@ export default function TitleCard({ data, outlet = "TGCOM24" }: Props) {
                 fontSize: "0.7rem",
                 padding: "3px 8px",
                 borderRadius: "99px",
-                background: "rgba(245,158,11,0.1)",
-                border: "1px solid rgba(245,158,11,0.25)",
+                background: "var(--warn-light)",
+                border: "1px solid #fcd34d",
                 color: "var(--warn)",
+                fontWeight: 400,
               }}
             >
               {WARN_ICONS[w.type] ?? "⚠️"} {w.message}
@@ -134,7 +123,7 @@ export default function TitleCard({ data, outlet = "TGCOM24" }: Props) {
       )}
 
       {data.validation.ok && (
-        <div style={{ padding: "0 1.25rem 0.75rem" }}>
+        <div style={{ padding: "0 1.25rem 0.85rem" }}>
           <span
             style={{
               display: "inline-flex",
@@ -143,9 +132,10 @@ export default function TitleCard({ data, outlet = "TGCOM24" }: Props) {
               fontSize: "0.7rem",
               padding: "3px 8px",
               borderRadius: "99px",
-              background: "rgba(16,185,129,0.1)",
-              border: "1px solid rgba(16,185,129,0.25)",
+              background: "var(--ok-light)",
+              border: "1px solid #6ee7b7",
               color: "var(--ok)",
+              fontWeight: 400,
             }}
           >
             ✓ Nessun problema rilevato
@@ -157,10 +147,9 @@ export default function TitleCard({ data, outlet = "TGCOM24" }: Props) {
       {showPreview && (
         <div
           style={{
-            padding: "0 1.25rem 1.25rem",
+            padding: "1rem 1.25rem 1.25rem",
             borderTop: "1px solid var(--border)",
-            paddingTop: "1rem",
-            marginTop: "0.25rem",
+            background: "var(--surface-2)",
           }}
         >
           <DiscoverPreview title={data.text} outlet={outlet} />
@@ -178,5 +167,6 @@ const iconBtn: React.CSSProperties = {
   color: "var(--text-muted)",
   fontSize: "0.75rem",
   cursor: "pointer",
-  transition: "color 0.15s",
+  fontFamily: "inherit",
+  fontWeight: 400,
 };

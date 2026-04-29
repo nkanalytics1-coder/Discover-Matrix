@@ -13,7 +13,7 @@ async function generate(
   outlet: GenerateRequest["outlet"],
   variant: "precise" | "bold"
 ): Promise<GeneratedTitle> {
-  const temperature = variant === "precise" ? 0.4 : 0.9;
+  const temperature = variant === "precise" ? 0.5 : 0.85;
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
